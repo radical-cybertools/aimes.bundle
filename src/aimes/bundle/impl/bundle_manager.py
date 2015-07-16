@@ -186,8 +186,8 @@ class BundleManager(ru.Daemon):
 
 
     def load_cluster_credentials(self, file_name):
-        _valid_p = ['cluster_type', 'hostname', 'username', 'password', 'key_filename']
-        _mandatory_p = ['cluster_type', 'hostname', 'username']
+        _valid_p = ['cluster_type', 'hostname', 'username', 'password', 'key_filename', 'config']
+        _mandatory_p = ['cluster_type', 'hostname']
         _missing_key = False
         try:
             _cred = []

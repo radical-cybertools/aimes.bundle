@@ -146,17 +146,20 @@ def main(argv=None):
         bm.load_cluster_credentials(config_file)
         ret = bm.get_data ()
 
+      # pprint.pprint (ret)
+
         for cluster in ret['cluster_list'] :
+            c = cluster.replace('.', '_')
             print "===> %s" % cluster
             print
             print "--   config"
-            pprint.pprint (ret['cluster_config'][cluster])
+            pprint.pprint (ret['cluster_config'][c])
             print
             print "--   workload"
-            pprint.pprint (ret['cluster_workload'][cluster])
+            pprint.pprint (ret['cluster_workload'][c])
             print
             print "--   bandwidth"
-            pprint.pprint (ret['cluster_bandwidth'][cluster])
+            pprint.pprint (ret['cluster_bandwidth'][c])
             print
             print
 

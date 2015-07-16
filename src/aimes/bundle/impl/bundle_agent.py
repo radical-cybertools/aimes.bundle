@@ -1333,10 +1333,57 @@ class SlurmAgent(RemoteBundleAgent, threading.Thread):
     def num_nodes(self):
         return backdoor_cluster_num_nodes[self.hostname]
 
+# ------------------------------------------------------------------------------
+#
+class ConfigAgent(threading.Thread):
+    my_type = 'config'
+
+    # --------------------------------------------------------------------------
+    def __init__(self, credential, verbose=0, db_dir=None):
+        self.hostname  = credential['hostname']
+        self._hostname = self.hostname.replace('.', '_')
+        self.state = 'INIT'
+        self.queue = None
+
+        import radical.utils as ru
+        self._cfg = ru.read_json (credential['config'])
+
+    # --------------------------------------------------------------------------
+    def cluster_type(self):
+        return self.my_type
+
+    # --------------------------------------------------------------------------
+    def cluster_state(self):
+        return self.state
+
+    # --------------------------------------------------------------------------
+    def get_configuration(self):
+        return {
+            'num_nodes' : self._cfg['cluster_config'][self._hostname]['num_nodes'],
+            'queue_info': self._cfg['cluster_config'][self._hostname]['queue_info']
+        }
+
+    # --------------------------------------------------------------------------
+    def get_queue_config(self, flag=0):
+        return self._cfg['cluster_config'][self._hostname]['queue_info']
+
+    # --------------------------------------------------------------------------
+    def get_workload(self):
+        return self._cfg['cluster_workload'][self._hostname]
+
+    # --------------------------------------------------------------------------
+    @property
+    def num_nodes(self):
+        return self._cfg['cluster_config'][self._hostname]['num_nodes']
+
+# ------------------------------------------------------------------------------
+
+
 supported_cluster_types = {
-    "moab" : MoabAgent,
-    "pbs" : PbsAgent,
-    "slurm" : SlurmAgent,
+    "moab"   : MoabAgent,
+    "pbs"    : PbsAgent,
+    "slurm"  : SlurmAgent,
+    "config" : ConfigAgent,
 }
 
 def create(cluster_attributes, db_dir=None, verbosity=0):
@@ -1364,6 +1411,12 @@ def create(cluster_attributes, db_dir=None, verbosity=0):
                     )
             else:
                 logging.error("Unsupported slurm cluster: {}".format(cluster_attributes['hostname']))
+        elif cluster_attributes['cluster_type'].lower() == 'config':
+            return ConfigAgent(
+                cluster_attributes,
+                verbosity,
+                db_dir
+                )
         logging.error("Unknown cluster type: {}".format(cluster_attributes['type']))
     except Exception as e:
         logging.exception('bundle agent creation failure!')

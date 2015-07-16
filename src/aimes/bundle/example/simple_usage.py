@@ -1,6 +1,6 @@
 import json
 import sys
-from bundle import BundleManager
+from aimes.bundle import BundleManager
 
 success = True
 
